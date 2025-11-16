@@ -1,0 +1,197 @@
+
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { AgentProfile, ChatMessage, Emotion, Gender, Profession, MessageAuthor, UserProfile, SpeakingStyle } from './types';
+import { getParallelAgentResponses } from './services/geminiService';
+import { AGENT_PROFILES } from './constants';
+import ChatView from './components/ChatView';
+import CallView from './components/CallView';
+import ImagePreviewModal from './components/ImagePreviewModal';
+
+const App: React.FC = () => {
+    const [agents, setAgents] = useState<AgentProfile[]>(AGENT_PROFILES);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [isThinking, setIsThinking] = useState(false);
+    const [thinkingMessage, setThinkingMessage] = useState('');
+
+    const [userProfile, setUserProfile] = useState<UserProfile>({
+        name: 'You',
+        bio: 'AI enthusiast exploring conversations with AI friends.',
+        avatarUrl: '',
+    });
+    const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+
+    const [view, setView] = useState<'chat' | 'call'>('chat');
+    const [agentInCall, setAgentInCall] = useState<AgentProfile | null>(null);
+    const [editingAgent, setEditingAgent] = useState<AgentProfile | null>(null);
+
+    useEffect(() => {
+        setMessages([{
+            author: { id: 'system', name: 'System' },
+            text: 'Welcome to the AI Agent Ensemble! Manage your AI friends in the sidebar and start the conversation.',
+            timestamp: new Date().toISOString()
+        }]);
+    }, []);
+    
+    const handleSendMessage = useCallback(async (text: string) => {
+        if (!text.trim() || isThinking) return;
+
+        const userAuthor: MessageAuthor = { id: 'user', name: userProfile.name, avatarUrl: userProfile.avatarUrl };
+        const userMessage: ChatMessage = { author: userAuthor, text, timestamp: new Date().toISOString() };
+        
+        const currentMessageHistory = [...messages, userMessage];
+        setMessages(currentMessageHistory);
+
+        setIsThinking(true);
+        setThinkingMessage('AI friends are thinking...');
+
+        try {
+            const agentResponses = await getParallelAgentResponses(agents, currentMessageHistory);
+
+            if (agentResponses.length > 0) {
+                // Wait for an initial "thinking" delay before the first response appears
+                const initialDelay = Math.random() * 5000 + 2000; // 2-7 seconds
+                await new Promise(res => setTimeout(res, initialDelay));
+                
+                const shuffledResponses = agentResponses.sort(() => Math.random() - 0.5);
+
+                for (let i = 0; i < shuffledResponses.length; i++) {
+                    const response = shuffledResponses[i];
+                    const agent = agents.find(a => a.id === response.agentId);
+
+                    if (agent) {
+                        // Show "typing" indicator for this agent
+                        setThinkingMessage(`${agent.name} is typing...`);
+
+                        // Wait for a short "typing" delay to simulate human behavior
+                        const typingDelay = Math.random() * 1500 + 500; // 0.5s to 2s
+                        await new Promise(res => setTimeout(res, typingDelay));
+                        
+                        // Add the message
+                        const newAgentMessage: ChatMessage = {
+                            author: { id: agent.id, name: agent.name, profile: agent },
+                            text: response.message,
+                            timestamp: new Date().toISOString()
+                        };
+                        setMessages(prev => [...prev, newAgentMessage]);
+
+                        // Wait for the gap between messages if it's not the last one
+                        if (i < shuffledResponses.length - 1) {
+                             setThinkingMessage(`AI friends are thinking...`); // Reset for next typing indicator
+                             const nextMessageDelay = Math.random() * 4000 + 2000; // 2-6s gap
+                             await new Promise(res => setTimeout(res, nextMessageDelay));
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error during message handling:", error);
+            const errorMessage: ChatMessage = {
+                author: { id: 'system', name: 'System' },
+                text: `An API error occurred. This is often due to rate limiting.\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                timestamp: new Date().toISOString()
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsThinking(false);
+            setThinkingMessage('');
+        }
+    }, [isThinking, messages, agents, userProfile]);
+
+    const handleAddAgent = useCallback(() => {
+        const newId = `agent-${Date.now()}`;
+        const newAgent: AgentProfile = {
+            id: newId,
+            name: `Agent ${agents.length + 1}`,
+            profession: Profession.Friend,
+            emotion: Emotion.Neutral,
+            gender: Gender.Female,
+            age: 25,
+            personalityTraits: [],
+            avatarUrl: '',
+            voiceName: 'Zephyr',
+            speakingStyle: SpeakingStyle.Expressive,
+        };
+        setAgents(prev => [...prev, newAgent]);
+        setEditingAgent(newAgent);
+    }, [agents.length]);
+    
+    const handleSelectAgentToEdit = useCallback((agent: AgentProfile) => {
+        setEditingAgent(agent);
+    }, []);
+
+    const handleCloseEditor = useCallback(() => {
+        setEditingAgent(null);
+    }, []);
+
+
+
+    const handleUpdateAgent = useCallback((updatedAgent: AgentProfile) => {
+        setAgents(prev => prev.map(agent => agent.id === updatedAgent.id ? updatedAgent : agent));
+    }, []);
+
+    const handleRemoveAgent = useCallback((agentId: string) => {
+        setAgents(prev => prev.filter(agent => agent.id !== agentId));
+        setEditingAgent(null); // Close editor if the edited agent is removed
+    }, []);
+
+    const handleStartCall = useCallback((agentId: string) => {
+        const agent = agents.find(a => a.id === agentId);
+        if (agent) {
+            setEditingAgent(null); // Close editor before starting call
+            setAgentInCall(agent);
+            setView('call');
+        } else {
+            console.error(`Could not find agent with id ${agentId} to start call.`);
+        }
+    }, [agents]);
+
+    const handleEndCall = useCallback(() => {
+        setView('chat');
+        setAgentInCall(null);
+    }, []);
+
+    const handleUpdateUserProfile = useCallback((profile: UserProfile) => {
+        setUserProfile(profile);
+    }, []);
+
+    const handleOpenImagePreview = useCallback((url: string) => {
+        setPreviewImageUrl(url);
+    }, []);
+
+    const handleCloseImagePreview = useCallback(() => {
+        setPreviewImageUrl(null);
+    }, []);
+
+    if (view === 'call' && agentInCall) {
+        return <CallView agent={agentInCall} onEndCall={handleEndCall} />;
+    }
+
+    return (
+        <>
+            <ChatView
+                agents={agents}
+                messages={messages}
+                isThinking={isThinking}
+                thinkingMessage={thinkingMessage}
+                onSendMessage={handleSendMessage}
+                onStartCall={handleStartCall}
+                onAddAgent={handleAddAgent}
+                onUpdateAgent={handleUpdateAgent}
+                onRemoveAgent={handleRemoveAgent}
+                editingAgent={editingAgent}
+                onSelectAgentToEdit={handleSelectAgentToEdit}
+                onCloseEditor={handleCloseEditor}
+                userProfile={userProfile}
+                onUpdateUserProfile={handleUpdateUserProfile}
+                isUserProfileModalOpen={isUserProfileModalOpen}
+                onOpenUserProfile={() => setIsUserProfileModalOpen(true)}
+                onCloseUserProfile={() => setIsUserProfileModalOpen(false)}
+                onOpenImagePreview={handleOpenImagePreview}
+            />
+            <ImagePreviewModal imageUrl={previewImageUrl} onClose={handleCloseImagePreview} />
+        </>
+    );
+};
+
+export default App;

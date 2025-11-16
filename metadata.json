@@ -1,0 +1,8 @@
+{
+  "name": "ai friends",
+  "description": "A multi-agent AI chat and voice interaction system where you can converse with multiple AI agents, each with a unique personality, emotion, and profession. Experience dynamic, context-aware conversations in real-time.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
