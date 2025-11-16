@@ -76,6 +76,11 @@ export enum SpeakingStyle {
     Serious = 'Serious',
 }
 
+export enum VoiceType {
+    Prebuilt = 'prebuilt',
+    Custom = 'custom',
+}
+
 export interface AgentProfile {
     id: string;
     name: string;
@@ -85,8 +90,10 @@ export interface AgentProfile {
     age: number;
     personalityTraits: PersonalityTrait[];
     avatarUrl?: string;
+    voiceType?: VoiceType;
     voiceName?: string;
     speakingStyle?: SpeakingStyle; // ADDED: speakingStyle property
+    customVoiceUrl?: string; // ADDED: customVoiceUrl property for vocal identity
 }
 
 export interface MessageAuthor {

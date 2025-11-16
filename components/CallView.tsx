@@ -7,6 +7,12 @@ import { encode, decode, decodeAudioData } from '../services/audioService';
 import { EMOTION_AVATAR_MAP } from '../constants';
 import { PhoneIcon } from './icons/PhoneIcon';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
+import { MicIcon } from './icons/MicIcon';
+import { MicOffIcon } from './icons/MicOffIcon';
+import { VideoIcon } from './icons/VideoIcon';
+import { VideoOffIcon } from './icons/VideoOffIcon';
+import { getAiInstance } from '../services/geminiService';
+
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -31,6 +37,8 @@ const JPEG_QUALITY = 0.7;
 const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
     const [transcripts, setTranscripts] = useState<Transcript[]>([]);
     const [connectionState, setConnectionState] = useState<'Connecting' | 'Connected' | 'Error' | 'Ended'>('Connecting');
+    const [isMicMuted, setIsMicMuted] = useState(false);
+    const [isVideoOff, setIsVideoOff] = useState(false);
     
     const sessionPromiseRef = useRef<Promise<LiveSession> | null>(null);
     const userVideoRef = useRef<HTMLVideoElement>(null);
@@ -56,7 +64,7 @@ const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
                 userVideoRef.current.srcObject = stream;
             }
 
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+            const ai = getAiInstance();
             const systemInstruction = generateSystemPrompt(agent, []);
 
             inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
@@ -208,6 +216,22 @@ const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
         onEndCall();
     };
 
+    const toggleMic = useCallback(() => {
+        if (!mediaStreamRef.current) return;
+        mediaStreamRef.current.getAudioTracks().forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        setIsMicMuted(prev => !prev);
+    }, []);
+
+    const toggleVideo = useCallback(() => {
+        if (!mediaStreamRef.current) return;
+        mediaStreamRef.current.getVideoTracks().forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        setIsVideoOff(prev => !prev);
+    }, []);
+
     useEffect(() => {
         startSession();
         return cleanup;
@@ -221,17 +245,31 @@ const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
                     className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors bg-black/20 p-2 rounded-lg"
                 >
                     <ChevronLeftIcon />
-                    <span>Back to Chat</span>
+                    <span className="hidden sm:inline">Back to Chat</span>
                 </button>
             </div>
 
-            <video ref={userVideoRef} autoPlay muted playsInline className="absolute top-4 right-4 w-48 h-36 bg-black rounded-lg shadow-xl object-cover z-20"></video>
+             <div className="absolute top-4 right-4 w-28 h-20 sm:w-48 sm:h-36 bg-black rounded-lg shadow-xl z-20 overflow-hidden">
+                <video 
+                    ref={userVideoRef} 
+                    autoPlay 
+                    muted 
+                    playsInline 
+                    className={`w-full h-full object-cover transition-opacity ${isVideoOff ? 'opacity-0' : 'opacity-100'}`}
+                ></video>
+                {isVideoOff && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800">
+                        <VideoOffIcon className="w-8 h-8 text-gray-400" />
+                        <span className="text-xs text-gray-400 mt-2">Video Off</span>
+                    </div>
+                )}
+            </div>
             <canvas ref={canvasRef} className="hidden"></canvas>
 
             <div className="flex-grow flex flex-col items-center justify-center p-4 pt-12">
                 <div className="text-center">
                     <div className="relative inline-block">
-                         <div className="w-32 h-32 rounded-full bg-gray-700 flex items-center justify-center text-6xl mb-4 border-4 border-gray-600 overflow-hidden">
+                         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gray-700 flex items-center justify-center text-6xl mb-4 border-4 border-gray-600 overflow-hidden">
                            {agent.avatarUrl ? (
                                 <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" />
                            ) : (
@@ -241,8 +279,8 @@ const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
                          <span className={`absolute bottom-3 right-0 block h-6 w-6 rounded-full ${connectionState === 'Connected' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'} border-4 border-gray-900`}></span>
                     </div>
                    
-                    <h1 className="text-4xl font-bold">{agent.name}</h1>
-                    <p className="text-lg text-gray-400">{agent.profession}</p>
+                    <h1 className="text-3xl sm:text-4xl font-bold">{agent.name}</h1>
+                    <p className="text-base sm:text-lg text-gray-400">{agent.profession}</p>
                     <p className="mt-2 text-indigo-400 font-medium h-6">{connectionState !== 'Connected' ? `${connectionState}...` : ''}</p>
                 </div>
                 
@@ -260,13 +298,27 @@ const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
                 </div>
             </div>
             
-            <div className="p-4 flex justify-center items-center shrink-0">
+             <div className="p-4 flex justify-center items-center shrink-0 space-x-4">
+                <button 
+                    onClick={toggleMic}
+                    className={`p-4 rounded-full transition-colors ${isMicMuted ? 'bg-yellow-500 text-white' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
+                    title={isMicMuted ? 'Unmute Microphone' : 'Mute Microphone'}
+                >
+                    {isMicMuted ? <MicOffIcon /> : <MicIcon />}
+                </button>
                 <button 
                     onClick={handleHangUp}
-                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-4 transition-colors"
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-5 transition-colors"
                     title="End Call"
                 >
                     <PhoneIcon className="rotate-[135deg]" />
+                </button>
+                <button 
+                    onClick={toggleVideo}
+                    className={`p-4 rounded-full transition-colors ${isVideoOff ? 'bg-yellow-500 text-white' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
+                    title={isVideoOff ? 'Turn Video On' : 'Turn Video Off'}
+                >
+                    {isVideoOff ? <VideoOffIcon /> : <VideoIcon />}
                 </button>
             </div>
         </div>

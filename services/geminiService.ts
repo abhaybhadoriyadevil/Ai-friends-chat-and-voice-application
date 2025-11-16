@@ -1,15 +1,49 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { AgentProfile, ChatMessage, SpeakingStyle } from "../types";
 import { PrebuiltVoice } from "../constants";
 import { generateSystemPrompt } from "./promptService";
 
-const API_KEY = process.env.API_KEY;
+let ai: GoogleGenAI | null = null;
 
-if (!API_KEY) {
-    throw new Error("API_KEY environment variable not set");
+export function initializeAi(apiKey: string) {
+    if (!apiKey) {
+        console.error("Attempted to initialize AI with an empty API key.");
+        ai = null; // Ensure instance is cleared if key is empty
+        return;
+    }
+    ai = new GoogleGenAI({ apiKey });
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+export function clearAiInstance() {
+    ai = null;
+}
+
+export function getAiInstance(): GoogleGenAI {
+    if (!ai) {
+        throw new Error("AI Service is not initialized. Please provide a valid API key in the settings.");
+    }
+    return ai;
+}
+
+export async function verifyApiKey(apiKey: string): Promise<boolean> {
+    if (!apiKey) {
+        return false;
+    }
+    try {
+        const tempAi = new GoogleGenAI({ apiKey });
+        // Use a simple, low-cost prompt to verify the key
+        await tempAi.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: 'hello',
+        });
+        return true;
+    } catch (error) {
+        console.error("API Key verification failed:", error);
+        return false;
+    }
+}
+
 
 const model = 'gemini-2.5-flash';
 
@@ -186,6 +220,7 @@ The JSON output must match the provided schema exactly. Do not add any extra tex
 `;
 
     try {
+        const ai = getAiInstance();
         const response = await ai.models.generateContent({
             model: model,
             contents: prompt,
@@ -230,7 +265,7 @@ The JSON output must match the provided schema exactly. Do not add any extra tex
 export async function generateSpeechPreview(text: string, voiceName: PrebuiltVoice, speakingStyle: SpeakingStyle): Promise<string> {
     try {
         const styledPrompt = `(Speaking in a ${speakingStyle.toLowerCase()} tone): ${text}`;
-
+        const ai = getAiInstance();
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash-preview-tts",
             contents: [{ parts: [{ text: styledPrompt }] }],

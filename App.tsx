@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { AgentProfile, ChatMessage, Emotion, Gender, Profession, MessageAuthor, UserProfile, SpeakingStyle } from './types';
-import { getParallelAgentResponses } from './services/geminiService';
+import { AgentProfile, ChatMessage, Emotion, Gender, Profession, MessageAuthor, UserProfile, SpeakingStyle, VoiceType } from './types';
+import { getParallelAgentResponses, initializeAi, clearAiInstance } from './services/geminiService';
 import { AGENT_PROFILES } from './constants';
 import ChatView from './components/ChatView';
 import CallView from './components/CallView';
@@ -24,14 +24,29 @@ const App: React.FC = () => {
     const [view, setView] = useState<'chat' | 'call'>('chat');
     const [agentInCall, setAgentInCall] = useState<AgentProfile | null>(null);
     const [editingAgent, setEditingAgent] = useState<AgentProfile | null>(null);
+    
+    const [apiKey, setApiKey] = useState<string>('');
 
     useEffect(() => {
         setMessages([{
             author: { id: 'system', name: 'System' },
-            text: 'Welcome to the AI Agent Ensemble! Manage your AI friends in the sidebar and start the conversation.',
+            text: 'Welcome to the AI Agent Ensemble! Please add your Gemini API key in the settings (top-right gear icon) to begin.',
             timestamp: new Date().toISOString()
         }]);
     }, []);
+
+    useEffect(() => {
+        if (apiKey) {
+            initializeAi(apiKey);
+        } else {
+            clearAiInstance();
+            console.warn("API Key is not set. AI features will not work.");
+        }
+    }, [apiKey]);
+
+    const handleUpdateApiKey = (key: string) => {
+        setApiKey(key);
+    };
     
     const handleSendMessage = useCallback(async (text: string) => {
         if (!text.trim() || isThinking) return;
@@ -88,7 +103,7 @@ const App: React.FC = () => {
             console.error("Error during message handling:", error);
             const errorMessage: ChatMessage = {
                 author: { id: 'system', name: 'System' },
-                text: `An API error occurred. This is often due to rate limiting.\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                text: `An API error occurred. Please check if your API key is valid in the settings.\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`,
                 timestamp: new Date().toISOString()
             };
             setMessages(prev => [...prev, errorMessage]);
@@ -109,8 +124,10 @@ const App: React.FC = () => {
             age: 25,
             personalityTraits: [],
             avatarUrl: '',
+            voiceType: VoiceType.Prebuilt,
             voiceName: 'Zephyr',
             speakingStyle: SpeakingStyle.Expressive,
+            customVoiceUrl: '',
         };
         setAgents(prev => [...prev, newAgent]);
         setEditingAgent(newAgent);
@@ -178,6 +195,7 @@ const App: React.FC = () => {
                 onStartCall={handleStartCall}
                 onAddAgent={handleAddAgent}
                 onUpdateAgent={handleUpdateAgent}
+                // FIX: The prop was being passed the undefined variable 'onRemoveAgent' instead of 'handleRemoveAgent'.
                 onRemoveAgent={handleRemoveAgent}
                 editingAgent={editingAgent}
                 onSelectAgentToEdit={handleSelectAgentToEdit}
@@ -188,6 +206,8 @@ const App: React.FC = () => {
                 onOpenUserProfile={() => setIsUserProfileModalOpen(true)}
                 onCloseUserProfile={() => setIsUserProfileModalOpen(false)}
                 onOpenImagePreview={handleOpenImagePreview}
+                apiKey={apiKey}
+                onUpdateApiKey={handleUpdateApiKey}
             />
             <ImagePreviewModal imageUrl={previewImageUrl} onClose={handleCloseImagePreview} />
         </>

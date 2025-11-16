@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChatMessage } from '../types';
 import { EMOTION_AVATAR_MAP } from '../constants';
@@ -74,7 +73,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onOpenImagePrevi
             )}
             <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                 {!isUser && <p className="text-sm text-gray-400 mb-1">{author.name}</p>}
-                <div className={`p-3 rounded-lg max-w-lg ${bubbleClasses}`}>
+                <div className={`p-3 rounded-lg max-w-[85%] sm:max-w-lg ${bubbleClasses}`}>
                     <p className="whitespace-pre-wrap">{text}</p>
                 </div>
             </div>

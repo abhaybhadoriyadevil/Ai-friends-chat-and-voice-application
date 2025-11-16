@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AgentProfile } from '../types';
 import AgentCard from './AgentCard';
@@ -25,21 +24,23 @@ const AgentEditorModal: React.FC<AgentEditorModalProps> = ({ isOpen, onClose, ag
             aria-modal="true"
         >
             <div
-                className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col p-6 md:p-8 overflow-hidden border border-gray-700"
+                className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col h-[90vh] max-h-[900px] p-6 md:p-8 border border-gray-700"
                 onClick={e => e.stopPropagation()}
             >
-                <AgentCard
-                    agent={agent}
-                    onUpdateAgent={onUpdateAgent}
-                    onRemoveAgent={onRemoveAgent}
-                    onStartCall={onStartCall}
-                    professions={PROFESSIONS}
-                    emotions={EMOTIONS}
-                    genders={GENDERS}
-                    personalityTraits={PERSONALITY_TRAITS}
-                    canRemove={canRemove}
-                />
-                <div className="mt-6 flex justify-end">
+                <div className="flex-grow overflow-y-auto pr-4 -mr-4">
+                    <AgentCard
+                        agent={agent}
+                        onUpdateAgent={onUpdateAgent}
+                        onRemoveAgent={onRemoveAgent}
+                        onStartCall={onStartCall}
+                        professions={PROFESSIONS}
+                        emotions={EMOTIONS}
+                        genders={GENDERS}
+                        personalityTraits={PERSONALITY_TRAITS}
+                        canRemove={canRemove}
+                    />
+                </div>
+                <div className="mt-6 flex justify-end shrink-0">
                     <button
                         onClick={onClose}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"

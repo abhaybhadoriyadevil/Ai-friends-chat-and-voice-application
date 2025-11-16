@@ -28,6 +28,8 @@ interface ChatViewProps {
     onOpenUserProfile: () => void;
     onCloseUserProfile: () => void;
     onOpenImagePreview: (url: string) => void;
+    apiKey: string;
+    onUpdateApiKey: (key: string) => void;
 }
 
 const ChatView: React.FC<ChatViewProps> = ({
@@ -49,6 +51,8 @@ const ChatView: React.FC<ChatViewProps> = ({
     onOpenUserProfile,
     onCloseUserProfile,
     onOpenImagePreview,
+    apiKey,
+    onUpdateApiKey,
 }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -107,6 +111,8 @@ const ChatView: React.FC<ChatViewProps> = ({
                 userProfile={userProfile}
                 onUpdateUserProfile={onUpdateUserProfile}
                 onOpenImagePreview={onOpenImagePreview}
+                apiKey={apiKey}
+                onUpdateApiKey={onUpdateApiKey}
             />
         </div>
     );

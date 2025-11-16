@@ -1,4 +1,4 @@
-import { Emotion, Gender, Profession, AgentProfile, PersonalityTrait, SpeakingStyle } from './types';
+import { Emotion, Gender, Profession, AgentProfile, PersonalityTrait, SpeakingStyle, VoiceType } from './types';
 
 export const PROFESSIONS: Profession[] = Object.values(Profession);
 export const EMOTIONS: Emotion[] = Object.values(Emotion);
@@ -20,8 +20,10 @@ export const AGENT_PROFILES: AgentProfile[] = [
         age: 32,
         personalityTraits: [PersonalityTrait.Nurturing, PersonalityTrait.Methodical, PersonalityTrait.Supportive],
         avatarUrl: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Priya',
+        voiceType: VoiceType.Prebuilt,
         voiceName: 'Kore',
         speakingStyle: SpeakingStyle.Calm,
+        customVoiceUrl: '',
     },
     {
         id: 'agent-2',
@@ -32,8 +34,10 @@ export const AGENT_PROFILES: AgentProfile[] = [
         age: 24,
         personalityTraits: [PersonalityTrait.Sarcastic, PersonalityTrait.Playful, PersonalityTrait.Extroverted, PersonalityTrait.Humorous, PersonalityTrait.Pragmatic],
         avatarUrl: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Rohan',
+        voiceType: VoiceType.Prebuilt,
         voiceName: 'Puck',
         speakingStyle: SpeakingStyle.Expressive,
+        customVoiceUrl: '',
     },
     {
         id: 'agent-3',
@@ -44,8 +48,10 @@ export const AGENT_PROFILES: AgentProfile[] = [
         age: 45,
         personalityTraits: [PersonalityTrait.Serious, PersonalityTrait.Analytical, PersonalityTrait.Pessimistic, PersonalityTrait.Methodical],
         avatarUrl: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Anjali',
+        voiceType: VoiceType.Prebuilt,
         voiceName: 'Charon',
         speakingStyle: SpeakingStyle.Formal,
+        customVoiceUrl: '',
     },
     {
         id: 'agent-4',
@@ -56,8 +62,10 @@ export const AGENT_PROFILES: AgentProfile[] = [
         age: 60,
         personalityTraits: [PersonalityTrait.Serious, PersonalityTrait.Introverted, PersonalityTrait.Competitive, PersonalityTrait.Analytical],
         avatarUrl: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Vikram',
+        voiceType: VoiceType.Prebuilt,
         voiceName: 'Fenrir',
         speakingStyle: SpeakingStyle.Serious,
+        customVoiceUrl: '',
     },
     {
         id: 'agent-5',
@@ -68,8 +76,10 @@ export const AGENT_PROFILES: AgentProfile[] = [
         age: 28,
         personalityTraits: [PersonalityTrait.Creative, PersonalityTrait.Extroverted, PersonalityTrait.Spontaneous, PersonalityTrait.Idealistic, PersonalityTrait.Optimistic],
         avatarUrl: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Meera',
+        voiceType: VoiceType.Prebuilt,
         voiceName: 'Zephyr',
         speakingStyle: SpeakingStyle.Cheerful,
+        customVoiceUrl: '',
     },
 ];
 

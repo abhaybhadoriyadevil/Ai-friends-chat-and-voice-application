@@ -1,5 +1,5 @@
 
-import { AgentProfile, PersonalityTrait, Profession, Emotion, SpeakingStyle } from "../types";
+import { AgentProfile, PersonalityTrait, Profession, Emotion, SpeakingStyle, VoiceType } from "../types";
 
 const PROFESSION_PROMPTS: Record<Profession, string> = {
     // FIX: Added prompt for the new Friend profession.
@@ -72,6 +72,10 @@ You also have the following personality traits. Embody them in your responses:
 ${agent.personalityTraits.map(trait => `- **${trait}**: ${PERSONALITY_TRAIT_PROMPTS[trait]}`).join('\n')}
 `
         : '';
+    
+    const vocalIdentitySection = agent.voiceType === VoiceType.Custom && agent.customVoiceUrl
+        ? `- Your Vocal Identity: You have a unique voice based on a custom audio file provided by the user. While you speak, your language and expression should reflect the unique persona this voice implies.`
+        : '';
 
     return `
 # CORE IDENTITY
@@ -81,6 +85,7 @@ ${agent.personalityTraits.map(trait => `- **${trait}**: ${PERSONALITY_TRAIT_PROM
 - Your Profession: ${agent.profession}. (${PROFESSION_PROMPTS[agent.profession]})
 - Your Current Emotion: ${agent.emotion}. (${EMOTION_PROMPTS[agent.emotion]})
 - Your Speaking Style: ${agent.speakingStyle || 'Expressive'}. Your vocal tone should consistently reflect this style.
+${vocalIdentitySection}
 ${personalitySection}
 # CONTEXT
 You are in a real-time, natural conversation with a User.
