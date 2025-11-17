@@ -71,14 +71,14 @@ const ChatView: React.FC<ChatViewProps> = ({
                         <>
                              <button
                                 onClick={onOpenUserProfile}
-                                className="text-gray-300 hover:text-white p-2 rounded-full transition-colors"
+                                className="text-gray-300 hover:text-white p-2 rounded-full transition-transform hover:scale-110 active:scale-95"
                                 title="Settings"
                             >
                                 <SettingsIcon />
                             </button>
                             <button
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="md:hidden text-gray-300 hover:text-white p-2 rounded-full transition-colors"
+                                className="md:hidden text-gray-300 hover:text-white p-2 rounded-full transition-transform hover:scale-110 active:scale-95"
                                 title="Manage Agents"
                             >
                                 <UsersIcon />
@@ -86,7 +86,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                         </>
                     }
                 />
-                <main className="flex-grow flex flex-col h-full min-h-0">
+                <main className="flex-grow flex flex-col h-full min-h-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-700/30 via-gray-900 to-gray-900">
                     <ChatWindow
                         messages={messages}
                         isThinking={isThinking}

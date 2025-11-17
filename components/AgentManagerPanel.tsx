@@ -58,7 +58,7 @@ const AgentManagerPanel: React.FC<AgentManagerPanelProps> = ({ agents, onAddAgen
                 <div className="mt-4 shrink-0">
                     <button
                         onClick={onAddAgent}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
+                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105"
                     >
                         + Add New Friend
                     </button>

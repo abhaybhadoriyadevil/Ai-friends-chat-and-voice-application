@@ -26,7 +26,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isThinking }) => {
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Type your message..."
                 disabled={isThinking}
-                className="flex-grow bg-gray-700/80 border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                className="flex-grow bg-gray-700/80 border-gray-600 text-white rounded-full p-3 pl-5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
             <button
                 type="submit"

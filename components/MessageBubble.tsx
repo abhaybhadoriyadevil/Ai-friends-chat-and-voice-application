@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ChatMessage } from '../types';
 import { EMOTION_AVATAR_MAP } from '../constants';
@@ -20,9 +21,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onOpenImagePrevi
         : isUser ? '👤' : '⚙️';
     
     const bubbleClasses = isUser
-        ? 'bg-indigo-600 text-white rounded-br-none'
+        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-none'
         : isAgent
-        ? 'bg-gray-700 text-gray-200 rounded-bl-none'
+        ? 'bg-gray-700 text-gray-200 rounded-bl-none shadow-lg'
         : 'bg-transparent text-gray-400 text-center text-sm w-full';
 
     const containerClasses = isUser

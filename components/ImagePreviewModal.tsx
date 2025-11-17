@@ -12,23 +12,12 @@ const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ imageUrl, onClose
 
     return (
         <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-opacity duration-300 animate-fadeIn"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-opacity duration-200 animate-zoomIn"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
             aria-labelledby="image-preview"
         >
-            <style>
-                {`
-                    @keyframes fadeIn {
-                        from { opacity: 0; }
-                        to { opacity: 1; }
-                    }
-                    .animate-fadeIn {
-                        animation: fadeIn 0.2s ease-out;
-                    }
-                `}
-            </style>
             <div
                 className="relative max-w-4xl max-h-[90vh] flex"
                 onClick={e => e.stopPropagation()} 

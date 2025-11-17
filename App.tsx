@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { AgentProfile, ChatMessage, Emotion, Gender, Profession, MessageAuthor, UserProfile, SpeakingStyle, VoiceType } from './types';
 import { getParallelAgentResponses, initializeAi, clearAiInstance } from './services/geminiService';
@@ -6,33 +5,38 @@ import { AGENT_PROFILES } from './constants';
 import ChatView from './components/ChatView';
 import CallView from './components/CallView';
 import ImagePreviewModal from './components/ImagePreviewModal';
+import usePersistentState from './hooks/usePersistentState';
 
 const App: React.FC = () => {
-    const [agents, setAgents] = useState<AgentProfile[]>(AGENT_PROFILES);
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [isThinking, setIsThinking] = useState(false);
-    const [thinkingMessage, setThinkingMessage] = useState('');
-
-    const [userProfile, setUserProfile] = useState<UserProfile>({
+    // Persisted state
+    const [agents, setAgents] = usePersistentState<AgentProfile[]>('ai-friends-agents', AGENT_PROFILES);
+    const [messages, setMessages] = usePersistentState<ChatMessage[]>('ai-friends-messages', []);
+    const [userProfile, setUserProfile] = usePersistentState<UserProfile>('ai-friends-user-profile', {
         name: 'You',
         bio: 'AI enthusiast exploring conversations with AI friends.',
         avatarUrl: '',
     });
+    const [apiKey, setApiKey] = usePersistentState<string>('ai-friends-api-key', '');
+
+    // Volatile state (not persisted)
+    const [isThinking, setIsThinking] = useState(false);
+    const [thinkingMessage, setThinkingMessage] = useState('');
     const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
     const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-
     const [view, setView] = useState<'chat' | 'call'>('chat');
     const [agentInCall, setAgentInCall] = useState<AgentProfile | null>(null);
     const [editingAgent, setEditingAgent] = useState<AgentProfile | null>(null);
     
-    const [apiKey, setApiKey] = useState<string>('');
-
     useEffect(() => {
-        setMessages([{
-            author: { id: 'system', name: 'System' },
-            text: 'Welcome to the AI Agent Ensemble! Please add your Gemini API key in the settings (top-right gear icon) to begin.',
-            timestamp: new Date().toISOString()
-        }]);
+        // Only show welcome message if there's no chat history (i.e., first-ever session).
+        if (messages.length === 0) {
+            setMessages([{
+                author: { id: 'system', name: 'System' },
+                text: 'Welcome to the AI Agent Ensemble! Please add your Gemini API key in the settings (top-right gear icon) to begin.',
+                timestamp: new Date().toISOString()
+            }]);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -111,7 +115,7 @@ const App: React.FC = () => {
             setIsThinking(false);
             setThinkingMessage('');
         }
-    }, [isThinking, messages, agents, userProfile]);
+    }, [isThinking, messages, agents, userProfile, setMessages]);
 
     const handleAddAgent = useCallback(() => {
         const newId = `agent-${Date.now()}`;
@@ -131,7 +135,7 @@ const App: React.FC = () => {
         };
         setAgents(prev => [...prev, newAgent]);
         setEditingAgent(newAgent);
-    }, [agents.length]);
+    }, [agents.length, setAgents]);
     
     const handleSelectAgentToEdit = useCallback((agent: AgentProfile) => {
         setEditingAgent(agent);
@@ -145,12 +149,12 @@ const App: React.FC = () => {
 
     const handleUpdateAgent = useCallback((updatedAgent: AgentProfile) => {
         setAgents(prev => prev.map(agent => agent.id === updatedAgent.id ? updatedAgent : agent));
-    }, []);
+    }, [setAgents]);
 
     const handleRemoveAgent = useCallback((agentId: string) => {
         setAgents(prev => prev.filter(agent => agent.id !== agentId));
         setEditingAgent(null); // Close editor if the edited agent is removed
-    }, []);
+    }, [setAgents]);
 
     const handleStartCall = useCallback((agentId: string) => {
         const agent = agents.find(a => a.id === agentId);
@@ -170,7 +174,7 @@ const App: React.FC = () => {
 
     const handleUpdateUserProfile = useCallback((profile: UserProfile) => {
         setUserProfile(profile);
-    }, []);
+    }, [setUserProfile]);
 
     const handleOpenImagePreview = useCallback((url: string) => {
         setPreviewImageUrl(url);

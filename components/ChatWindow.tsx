@@ -31,10 +31,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages, isThinking, thinkingM
                         <MessageBubble key={index} message={msg} onOpenImagePreview={onOpenImagePreview} />
                     ))}
                     {isThinking && (
-                        <div className="flex items-center space-x-2 text-gray-400 animate-pulse">
-                           <div className="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0"></div>
-                           <div className="text-sm p-2 bg-gray-700 rounded-lg">{thinkingMessage}</div>
-                        </div>
+                         <div className="flex items-end gap-3 justify-start">
+                            <div className="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0"></div>
+                            <div className="flex flex-col items-start">
+                                 <div className="p-3 rounded-lg max-w-[85%] sm:max-w-lg bg-gray-700 text-gray-200 rounded-bl-none">
+                                     <div className="flex items-center justify-center gap-1.5 h-5">
+                                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-bouncing-dots" style={{ animationDelay: '0s' }}></span>
+                                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-bouncing-dots" style={{ animationDelay: '0.2s' }}></span>
+                                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-bouncing-dots" style={{ animationDelay: '0.4s' }}></span>
+                                     </div>
+                                 </div>
+                            </div>
+                         </div>
                     )}
                     <div ref={messagesEndRef} />
                 </div>

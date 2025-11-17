@@ -269,14 +269,16 @@ const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
             <div className="flex-grow flex flex-col items-center justify-center p-4 pt-12">
                 <div className="text-center">
                     <div className="relative inline-block">
-                         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gray-700 flex items-center justify-center text-6xl mb-4 border-4 border-gray-600 overflow-hidden">
+                         <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gray-700 flex items-center justify-center text-6xl mb-4 border-4 border-gray-600 overflow-hidden ${connectionState === 'Connected' ? 'animate-breathing-border' : ''}`}>
                            {agent.avatarUrl ? (
                                 <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" />
                            ) : (
                                 <span>{EMOTION_AVATAR_MAP[agent.emotion]}</span>
                            )}
                          </div>
-                         <span className={`absolute bottom-3 right-0 block h-6 w-6 rounded-full ${connectionState === 'Connected' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'} border-4 border-gray-900`}></span>
+                         <span className={`absolute bottom-3 right-0 block h-6 w-6 rounded-full ${connectionState === 'Connected' ? 'bg-green-500' : 'bg-yellow-500'} border-4 border-gray-900`}>
+                            {connectionState === 'Connected' && <span className="absolute inset-0 rounded-full bg-green-400 animate-ping"></span>}
+                         </span>
                     </div>
                    
                     <h1 className="text-3xl sm:text-4xl font-bold">{agent.name}</h1>
@@ -298,28 +300,30 @@ const CallView: React.FC<CallViewProps> = ({ agent, onEndCall }) => {
                 </div>
             </div>
             
-             <div className="p-4 flex justify-center items-center shrink-0 space-x-4">
-                <button 
-                    onClick={toggleMic}
-                    className={`p-4 rounded-full transition-colors ${isMicMuted ? 'bg-yellow-500 text-white' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
-                    title={isMicMuted ? 'Unmute Microphone' : 'Mute Microphone'}
-                >
-                    {isMicMuted ? <MicOffIcon /> : <MicIcon />}
-                </button>
-                <button 
-                    onClick={handleHangUp}
-                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-5 transition-colors"
-                    title="End Call"
-                >
-                    <PhoneIcon className="rotate-[135deg]" />
-                </button>
-                <button 
-                    onClick={toggleVideo}
-                    className={`p-4 rounded-full transition-colors ${isVideoOff ? 'bg-yellow-500 text-white' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
-                    title={isVideoOff ? 'Turn Video On' : 'Turn Video Off'}
-                >
-                    {isVideoOff ? <VideoOffIcon /> : <VideoIcon />}
-                </button>
+             <div className="p-4 flex justify-center items-center shrink-0">
+                <div className="bg-black/30 backdrop-blur-sm p-2 rounded-full flex items-center gap-4">
+                    <button 
+                        onClick={toggleMic}
+                        className={`p-4 rounded-full transition-colors ${isMicMuted ? 'bg-yellow-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
+                        title={isMicMuted ? 'Unmute Microphone' : 'Mute Microphone'}
+                    >
+                        {isMicMuted ? <MicOffIcon /> : <MicIcon />}
+                    </button>
+                    <button 
+                        onClick={handleHangUp}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded-full p-5 transition-colors"
+                        title="End Call"
+                    >
+                        <PhoneIcon className="rotate-[135deg]" />
+                    </button>
+                    <button 
+                        onClick={toggleVideo}
+                        className={`p-4 rounded-full transition-colors ${isVideoOff ? 'bg-yellow-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
+                        title={isVideoOff ? 'Turn Video On' : 'Turn Video Off'}
+                    >
+                        {isVideoOff ? <VideoOffIcon /> : <VideoIcon />}
+                    </button>
+                </div>
             </div>
         </div>
     );
